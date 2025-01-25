@@ -16,8 +16,8 @@ const Report = () => {
     vehicle_color: "null",
     vehicle_type: "null",
     status: "null",
-    fromDate: null, // Entry Date
-    toDate: null,   // Exit Date
+    fromDate: null,
+    toDate: null,
     vehicle_number:null,
   });
 
@@ -39,8 +39,8 @@ const Report = () => {
           vehicle_color: selectedValues.vehicle_color,
           vehicle_type: selectedValues.vehicle_type,
           status: selectedValues.status,
-          fromDate: selectedValues.fromDate, // Include Entry Date
-          toDate: selectedValues.toDate,     // Include Exit Date
+          fromDate: selectedValues.fromDate,
+          toDate: selectedValues.toDate,
           vehicle_number:selectedValues.vehicle_number
         }),
       });
@@ -64,11 +64,65 @@ const Report = () => {
     setSelectedValues({ ...selectedValues, [key]: value });
   };
 
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+  
+    doc.setFontSize(8);
+    doc.text("Vehicle Data Report", 14, 10);
+  
+    const columns = [
+      "Sr. No.",
+      "Date/Time",
+      "Gate No.",
+      "Veh No.",
+      "Plate Type",
+      "Veh Color",
+      "Veh Type",
+      "Status"
+    ];
+  
+    const rows = reportData.map((item, index) => [
+      index + 1,
+      new Date(item.entry_time).toLocaleDateString(),
+      item.gate_number || "N/A",
+      item.vehicle_number || "N/A",
+      item.plate_type || "N/A",
+      item.vehicle_color || "N/A",
+      item.vehicle_type || "N/A",
+      item.status || "N/A",
+    ]);
+  
+    const startX = 10;
+    let startY = 20;
+  
+    const columnWidths = [15, 20, 30, 20, 20, 20, 20, 20, 20];
+  
+    columns.forEach((col, idx) => {
+      const x = startX + columnWidths.slice(0, idx).reduce((a, b) => a + b, 0);
+      doc.text(col, x, startY);
+    });
+  
+    startY += 5;
+    doc.line(startX, startY, startX + columnWidths.reduce((a, b) => a + b, 0), startY); 
+  
+    rows.forEach((row, rowIndex) => {
+      const y = startY + 10 + rowIndex * 10;
+      row.forEach((cell, cellIndex) => {
+        const value = cell || "N/A";
+        const x = startX + columnWidths.slice(0, cellIndex).reduce((a, b) => a + b, 0);
+        doc.text(value.toString(), x, y);
+      });
+    });
+  
+    doc.save("vehicle-data-report.pdf");
+  }
+
   return (
     <Layout>
       {/* Navbar section */}
       <Navbar data="Report" />
-
+       <p>{JSON.stringify(reportData)}</p>
       {/* Report section */}
       <div className="shadow-md">
         <div className="flex justify-between p-4">
@@ -158,7 +212,7 @@ const Report = () => {
           <p className="font-semibold text-[#242533]">Cross channel analysis</p>
           <div className="flex">
             <div><img src={reload} alt="" /></div>
-            <div><img src={download} alt=""  className="cursor-pointer" /></div>
+            <div><img src={download} alt=""  className="cursor-pointer" onClick={generatePDF}/></div>
             <div><img src={threedots} alt="" /></div>
           </div>
         </div>
