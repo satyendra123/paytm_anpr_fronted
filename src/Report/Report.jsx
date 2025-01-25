@@ -122,7 +122,7 @@ const Report = () => {
     <Layout>
       {/* Navbar section */}
       <Navbar data="Report" />
-       <p>{JSON.stringify(reportData)}</p>
+
       {/* Report section */}
       <div className="shadow-md">
         <div className="flex justify-between p-4">
